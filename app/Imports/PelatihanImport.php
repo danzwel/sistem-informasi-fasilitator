@@ -6,7 +6,6 @@ use App\Models\Fasilitator;
 use App\Models\RiwayatPelatihan;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Illuminate\Support\Collection;
-use Carbon\Carbon;
 
 class PelatihanImport implements ToCollection
 {
@@ -17,6 +16,7 @@ class PelatihanImport implements ToCollection
         'pelatihan_ditambahkan' => 0,
         'baris_dilewati' => 0,
         'baris_dikecualikan' => 0,
+        'dikecualikan_detail' => [],
         'valid' => [],
         'bermasalah' => [],
     ];
@@ -43,11 +43,16 @@ class PelatihanImport implements ToCollection
 
     private function pilihNilai(array $override, $nomorBaris, $asli)
     {
-        $dariOverride = trim($override[$nomorBaris] ?? '');
+        $dariOverride = $this->normalisasiTeks($override[$nomorBaris] ?? '');
         if ($dariOverride !== '') {
             return $dariOverride;
         }
-        return $asli ? trim($asli) : '';
+        return $this->normalisasiTeks($asli);
+    }
+
+    private function normalisasiTeks($nilai): string
+    {
+        return preg_replace('/\s+/', ' ', trim((string) $nilai)) ?? '';
     }
 
     public function collection(Collection $rows)
@@ -83,6 +88,12 @@ class PelatihanImport implements ToCollection
             // Admin sengaja uncheck / hapus baris ini
             if (in_array($nomorBaris, $this->dikecualikan)) {
                 $this->ringkasan['baris_dikecualikan']++;
+                $this->ringkasan['dikecualikan_detail'][] = [
+                    'baris' => $nomorBaris,
+                    'nama_fasilitator' => $namaFasilitatorFinal,
+                    'nama_pelatihan' => $namaPelatihanFinal,
+                    'materi' => $materiFinal,
+                ];
                 continue;
             }
 
@@ -122,7 +133,7 @@ class PelatihanImport implements ToCollection
                 $this->ringkasan['fasilitator_lama']++;
             }
 
-            $tanggal = $this->parseTanggal($tahun, $bulan);
+            $keterangan = $this->buatKeterangan($materiFinal, $bulan, $tahun);
 
             $this->ringkasan['valid'][] = [
                 'baris' => $nomorBaris,
@@ -137,7 +148,7 @@ class PelatihanImport implements ToCollection
             if (!$this->simulasiSaja && $fasilitator) {
                 $sudahAda = RiwayatPelatihan::where('fasilitator_id', $fasilitator->id)
                     ->where('nama_kegiatan', $namaPelatihanFinal)
-                    ->where('keterangan', $materiFinal)
+                    ->where('keterangan', $keterangan)
                     ->exists();
 
                 if (!$sudahAda) {
@@ -145,8 +156,8 @@ class PelatihanImport implements ToCollection
                         'fasilitator_id' => $fasilitator->id,
                         'kategori' => 'materi_diajarkan',
                         'nama_kegiatan' => $namaPelatihanFinal,
-                        'tanggal' => $tanggal,
-                        'keterangan' => $materiFinal ?: null,
+                        'tanggal' => null,
+                        'keterangan' => $keterangan,
                     ]);
                     $this->ringkasan['pelatihan_ditambahkan']++;
                 }
@@ -156,24 +167,19 @@ class PelatihanImport implements ToCollection
         }
     }
 
-    private function parseTanggal($tahun, $bulan)
+    private function buatKeterangan($materi, $bulan, $tahun): ?string
     {
-        if (empty($tahun) || empty($bulan)) {
-            return null;
+        $bagian = [];
+
+        if ($materi !== '') {
+            $bagian[] = 'Materi: ' . $materi;
         }
 
-        $bulanMap = [
-            'januari' => 1, 'februari' => 2, 'maret' => 3, 'april' => 4,
-            'mei' => 5, 'juni' => 6, 'juli' => 7, 'agustus' => 8,
-            'september' => 9, 'oktober' => 10, 'november' => 11, 'desember' => 12,
-        ];
-
-        $bulanAngka = $bulanMap[strtolower(trim($bulan))] ?? 1;
-
-        try {
-            return Carbon::createFromDate((int) $tahun, $bulanAngka, 1)->format('Y-m-d');
-        } catch (\Exception $e) {
-            return null;
+        $periode = trim(implode(' ', array_filter([$bulan, $tahun], fn ($nilai) => !empty($nilai))));
+        if ($periode !== '') {
+            $bagian[] = 'Periode: ' . $periode;
         }
+
+        return $bagian ? implode("\n", $bagian) : null;
     }
 }

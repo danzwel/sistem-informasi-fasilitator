@@ -7,6 +7,10 @@ use App\Http\Controllers\RiwayatPendidikanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KegiatanController;
+use App\Http\Controllers\PengajuanController;
+use App\Http\Controllers\RatingController;
+use App\Http\Controllers\MateriController;
 
 Route::middleware('guest')->group(function () {
     Route::get('login', [AuthController::class, 'create'])->name('login');
@@ -40,3 +44,12 @@ Route::get('fasilitator/{fasilitator}/cv/pdf', [FasilitatorController::class, 'c
 Route::get('import', [ImportController::class, 'create'])->middleware($operator)->name('import.create');
 Route::post('import/preview', [ImportController::class, 'preview'])->middleware($operator)->name('import.preview');
 Route::post('import/store', [ImportController::class, 'store'])->middleware($operator)->name('import.store');
+
+Route::get('kegiatan', [KegiatanController::class, 'index'])->middleware($viewer)->name('kegiatan.index');
+Route::post('kegiatan', [KegiatanController::class, 'store'])->middleware($operator)->name('kegiatan.store');
+Route::get('pengajuan', [PengajuanController::class, 'index'])->middleware($viewer)->name('pengajuan.index');
+Route::post('pengajuan', [PengajuanController::class, 'store'])->middleware($operator)->name('pengajuan.store');
+Route::patch('pengajuan/{pengajuan}/review', [PengajuanController::class, 'review'])->middleware('auth', 'role:admin')->name('pengajuan.review');
+Route::post('rating', [RatingController::class, 'store'])->middleware($operator)->name('rating.store');
+Route::get('materi', [MateriController::class, 'index'])->middleware($viewer)->name('materi.index');
+Route::post('materi', [MateriController::class, 'store'])->middleware($operator)->name('materi.store');

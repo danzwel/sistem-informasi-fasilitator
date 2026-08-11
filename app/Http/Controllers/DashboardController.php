@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Fasilitator;
+use App\Models\ActivityLog;
+use App\Models\Kegiatan;
+use App\Models\Pengajuan;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -62,6 +65,9 @@ class DashboardController extends Controller
             'totalFasilitator' => $fasilitators->count(),
             'totalAktif' => $fasilitators->where('status', 'aktif')->count(),
             'totalBelumLengkap' => $belumLengkap->count(),
+            'totalPengajuanPending' => Pengajuan::where('status', 'pending')->count(),
+            'totalKegiatanAktif' => Kegiatan::whereIn('status', ['upcoming', 'ongoing'])->count(),
+            'aktivitasTerbaru' => ActivityLog::with('user')->latest()->limit(10)->get(),
         ]);
     }
 }

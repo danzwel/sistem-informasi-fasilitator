@@ -79,6 +79,7 @@
     <form action="{{ route('import.store') }}" method="POST" id="form-import" onsubmit="return confirm('Yakin mau import data ini ke database?')">
         @csrf
         <input type="hidden" name="path" value="{{ $path }}">
+        <input type="hidden" name="import_batch_id" value="{{ $importBatch->id }}">
 
         @if (count($ringkasan['bermasalah']))
             <h2 style="color:#c00;">⚠ Baris Bermasalah ({{ count($ringkasan['bermasalah']) }})</h2>
@@ -155,6 +156,11 @@
         @endif
 
         <br>
+        <label>
+            <input type="checkbox" name="confirm_import" value="1" required>
+            Saya sudah meninjau preview dan menyetujui import ini.
+        </label>
+        <br><br>
         <button type="submit">✔ Import Sekarang</button>
     </form>
 
