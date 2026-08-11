@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Fasilitator extends Model
 {
@@ -37,5 +38,10 @@ class Fasilitator extends Model
     public function riwayatPendidikan()
     {
         return $this->hasMany(RiwayatPendidikan::class);
+    }
+
+    public function media(): MorphMany
+    {
+        return $this->morphMany(Media::class, 'mediable');
     }
 }
