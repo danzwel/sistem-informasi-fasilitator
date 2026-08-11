@@ -59,6 +59,16 @@ class User extends Authenticatable
         return $this->hasMany(ImportBatch::class);
     }
 
+    public function reviewedPengajuans(): HasMany
+    {
+        return $this->hasMany(Pengajuan::class, 'reviewed_by');
+    }
+
+    public function ratingsGiven(): HasMany
+    {
+        return $this->hasMany(Rating::class, 'reviewer_id');
+    }
+
     public function hasRole(string ...$roles): bool
     {
         return in_array($this->role, $roles, true);

@@ -130,6 +130,7 @@ class FasilitatorController extends Controller
     {
         $riwayatPelatihan = $fasilitator->riwayatPelatihan()->latest('tanggal')->get();
         $riwayatPendidikan = $fasilitator->riwayatPendidikan()->orderBy('tahun_mulai')->get();
+        $kegiatans = $fasilitator->kegiatans()->orderByDesc('tanggal_mulai')->get();
 
         return [
             'fasilitator' => $fasilitator,
@@ -137,6 +138,7 @@ class FasilitatorController extends Controller
             'materiDiajarkan' => $riwayatPelatihan->where('kategori', 'materi_diajarkan'),
             'pelatihanTerkait' => $riwayatPelatihan->where('kategori', 'pelatihan_terkait'),
             'pengalamanMengajar' => $riwayatPelatihan->where('kategori', 'pengalaman_mengajar'),
+            'kegiatans' => $kegiatans,
             'forPdf' => $forPdf,
         ];
     }

@@ -256,6 +256,15 @@
         <div>-</div>
     @endif
 
+    @if ($kegiatans->count())
+        <div class="section-title">Kegiatan</div>
+        <ul class="list-kegiatan">
+            @foreach ($kegiatans as $kegiatan)
+                <li>{{ $kegiatan->nama }}{{ $kegiatan->pivot->peran ? ' — ' . $kegiatan->pivot->peran : '' }}</li>
+            @endforeach
+        </ul>
+    @endif
+
     <div class="footer">
         <div>Bandung, {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('d F Y') }}</div>
         <div class="ttd-space">

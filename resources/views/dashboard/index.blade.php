@@ -23,6 +23,14 @@
             <div>Total Fasilitator</div>
         </div>
         <div class="kotak">
+            <div class="angka">{{ $totalPengajuanPending }}</div>
+            <div>Pengajuan Pending</div>
+        </div>
+        <div class="kotak">
+            <div class="angka">{{ $totalKegiatanAktif }}</div>
+            <div>Kegiatan Aktif</div>
+        </div>
+        <div class="kotak">
             <div class="angka">{{ $totalAktif }}</div>
             <div>Fasilitator Aktif</div>
         </div>
@@ -72,6 +80,21 @@
             <tr>
                 <td colspan="7">Tidak ada data untuk filter ini.</td>
             </tr>
+        @endforelse
+    </table>
+
+    <h2>Aktivitas Terbaru</h2>
+    <table border="1" cellpadding="8">
+        <tr><th>Waktu</th><th>Aksi</th><th>Pengguna</th><th>Keterangan</th></tr>
+        @forelse ($aktivitasTerbaru as $aktivitas)
+            <tr>
+                <td>{{ $aktivitas->created_at }}</td>
+                <td>{{ $aktivitas->action }}</td>
+                <td>{{ $aktivitas->user?->name ?? '-' }}</td>
+                <td>{{ $aktivitas->description ?? '-' }}</td>
+            </tr>
+        @empty
+            <tr><td colspan="4">Belum ada aktivitas.</td></tr>
         @endforelse
     </table>
 </body>
